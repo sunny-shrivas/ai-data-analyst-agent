@@ -37,3 +37,11 @@ def test_context_uses_aggregates_not_raw_rows():
 def test_empty_csv_is_rejected():
     with pytest.raises(ValueError):
         read_csv_safely(BytesIO(b""))
+
+def test_ai_agent_has_local_fallback_without_api_key(monkeypatch):
+    from agent import answer_with_ai
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    answer, mode = answer_with_ai("What are the sales?", "Rows: 12")
+    assert mode == "Local analysis (no API key)"
+    assert "Rows: 12" in answer
+    assert "OPENAI_API_KEY" in answer

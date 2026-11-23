@@ -48,9 +48,9 @@ m[3].metric("Duplicate rows", f"{profile['duplicate_rows']:,}")
 overview, quality, explore, analyst = st.tabs(["Overview", "Data quality", "Explore", "Ask the analyst"])
 with overview:
     st.subheader("Dataset preview")
-    st.dataframe(df.head(100), width="stretch")
+    st.dataframe(df.head(100), use_container_width=True)
     st.subheader("Column profile")
-    st.dataframe(pd.DataFrame(profile["column_profiles"]), width="stretch")
+    st.dataframe(pd.DataFrame(profile["column_profiles"]), use_container_width=True)
     st.subheader("Automated observations")
     for insight in insights:
         st.write("• " + insight)
@@ -59,15 +59,15 @@ with quality:
     missing = df.isna().sum().rename("Missing values").reset_index()
     missing.columns = ["Column", "Missing values"]
     missing = missing.sort_values("Missing values", ascending=False)
-    st.dataframe(missing, width="stretch")
+    st.dataframe(missing, use_container_width=True)
     positive = missing[missing["Missing values"] > 0]
     if positive.empty:
         st.success("No missing values detected.")
     else:
-        st.plotly_chart(px.bar(positive, x="Column", y="Missing values", title="Missing values by column"), width="stretch")
+        st.plotly_chart(px.bar(positive, x="Column", y="Missing values", title="Missing values by column"), use_container_width=True)
     st.write(f"Duplicate rows: **{profile['duplicate_rows']}**")
     if profile["duplicate_rows"]:
-        st.dataframe(df[df.duplicated(keep=False)].head(100), width="stretch")
+        st.dataframe(df[df.duplicated(keep=False)].head(100), use_container_width=True)
 
 with explore:
     numeric = df.select_dtypes(include="number").columns.tolist()
@@ -83,7 +83,7 @@ with explore:
             else:
                 group = st.selectbox("Group by (optional)", ["None"] + categorical)
                 fig = px.box(df, x=None if group == "None" else group, y=y, title=f"{y} distribution")
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
     elif kind in ("Bar", "Line"):
         if not numeric:
             st.info("At least one numeric column is required.")
@@ -96,7 +96,7 @@ with explore:
                 fig = px.bar(values, x=x, y=y, title=f"{agg.title()} of {y} by {x}")
             else:
                 fig = px.line(values, x=x, y=y, markers=True, title=f"{agg.title()} of {y} by {x}")
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
     else:
         if len(numeric) < 2:
             st.info("At least two numeric columns are required for a scatter plot.")
@@ -105,7 +105,7 @@ with explore:
             y = st.selectbox("Y axis", [c for c in numeric if c != x])
             color = st.selectbox("Color by (optional)", ["None"] + categorical)
             fig = px.scatter(df, x=x, y=y, color=None if color == "None" else color, title=f"{y} vs {x}")
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
 
 with analyst:
     st.subheader("Ask a question about your data")
@@ -119,5 +119,5 @@ with analyst:
         st.caption("Answer mode: " + mode)
 
 st.divider()
-st.download_button("Download current dataset", df.to_csv(index=False).encode("utf-8"), "analyzed_dataset.csv", "text/csv", width="stretch")
+st.download_button("Download current dataset", df.to_csv(index=False).encode("utf-8"), "analyzed_dataset.csv", "text/csv", use_container_width=True)
 st.caption("Built with Python, Pandas, Plotly, Streamlit, and optional OpenAI.")
